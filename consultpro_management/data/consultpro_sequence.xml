@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="seq_consultpro_client" model="ir.sequence">
+        <field name="name">ConsultPro Client</field>
+        <field name="code">consultpro.client</field>
+        <field name="prefix">CLT-</field>
+        <field name="padding">5</field>
+        <field name="number_increment">1</field>
+        <field name="number_next">1</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+    <record id="seq_consultpro_contract" model="ir.sequence">
+        <field name="name">ConsultPro Contract</field>
+        <field name="code">consultpro.contract</field>
+        <field name="prefix">CNT-%(year)s-</field>
+        <field name="padding">4</field>
+        <field name="number_increment">1</field>
+        <field name="number_next">1</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+    <record id="seq_consultpro_project" model="ir.sequence">
+        <field name="name">ConsultPro Project</field>
+        <field name="code">consultpro.project</field>
+        <field name="prefix">PRJ-%(year)s-</field>
+        <field name="padding">4</field>
+        <field name="number_increment">1</field>
+        <field name="number_next">1</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+    <record id="seq_consultpro_consultant" model="ir.sequence">
+        <field name="name">ConsultPro Consultant</field>
+        <field name="code">consultpro.consultant</field>
+        <field name="prefix">CON-</field>
+        <field name="padding">4</field>
+        <field name="number_increment">1</field>
+        <field name="number_next">1</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+    <record id="seq_consultpro_invoice" model="ir.sequence">
+        <field name="name">ConsultPro Invoice</field>
+        <field name="code">consultpro.invoice</field>
+        <field name="prefix">CPINV-%(year)s-</field>
+        <field name="padding">4</field>
+        <field name="number_increment">1</field>
+        <field name="number_next">1</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+</odoo>

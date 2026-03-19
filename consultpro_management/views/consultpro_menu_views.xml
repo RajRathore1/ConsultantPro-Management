@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ROOT MENU -->
+    <menuitem
+        id="menu_consultpro_root"
+        name="ConsultPro"
+        web_icon="consultpro_management,static/description/icon.png"
+        sequence="50"
+        />
+
+    <!-- My Work -->
+    <menuitem
+        id="menu_consultpro_my_work"
+        name="My Work"
+        parent="menu_consultpro_root"
+        sequence="5"
+        groups="consultpro_management.group_consultpro_consultant"/>
+
+    <menuitem
+        id="menu_consultpro_my_tasks"
+        name="My Tasks"
+        parent="menu_consultpro_my_work"
+        action="action_consultpro_task_my"
+        sequence="1"/>
+
+    <menuitem
+        id="menu_consultpro_my_timesheets"
+        name="My Timesheets"
+        parent="menu_consultpro_my_work"
+        action="action_consultpro_timesheet_my"
+        sequence="2"/>
+
+    <!-- Projects -->
+    <menuitem
+        id="menu_consultpro_projects"
+        name="Projects"
+        parent="menu_consultpro_root"
+        sequence="10"
+        groups="consultpro_management.group_consultpro_consultant"/>
+
+    <menuitem
+        id="menu_consultpro_project_all"
+        name="All Projects"
+        parent="menu_consultpro_projects"
+        action="action_consultpro_project"
+        sequence="1"/>
+
+    <menuitem
+        id="menu_consultpro_task_all"
+        name="Tasks"
+        parent="menu_consultpro_projects"
+        action="action_consultpro_task"
+        sequence="2"
+        groups="consultpro_management.group_consultpro_manager"/>
+
+    <menuitem
+        id="menu_consultpro_timesheet_all"
+        name="Timesheets"
+        parent="menu_consultpro_projects"
+        action="action_consultpro_timesheet"
+        sequence="3"
+        groups="consultpro_management.group_consultpro_manager"/>
+
+    <!-- Clients & Contracts -->
+    <menuitem
+        id="menu_consultpro_clients"
+        name="Clients"
+        parent="menu_consultpro_root"
+        sequence="20"
+        groups="consultpro_management.group_consultpro_account_manager"/>
+
+    <menuitem
+        id="menu_consultpro_client_list"
+        name="Clients"
+        parent="menu_consultpro_clients"
+        action="action_consultpro_client"
+        sequence="1"/>
+
+    <menuitem
+        id="menu_consultpro_contract_list"
+        name="Contracts"
+        parent="menu_consultpro_clients"
+        action="action_consultpro_contract"
+        sequence="2"/>
+
+    <!-- Billing -->
+    <menuitem
+        id="menu_consultpro_billing"
+        name="Billing"
+        parent="menu_consultpro_root"
+        sequence="30"
+        groups="consultpro_management.group_consultpro_account_manager"/>
+
+    <menuitem
+        id="menu_consultpro_invoice_list"
+        name="Invoices"
+        parent="menu_consultpro_billing"
+        action="action_consultpro_invoice"
+        sequence="1"/>
+
+    <!-- Configuration -->
+    <menuitem
+        id="menu_consultpro_config"
+        name="Configuration"
+        parent="menu_consultpro_root"
+        sequence="90"
+        groups="consultpro_management.group_consultpro_admin"/>
+
+    <menuitem
+        id="menu_consultpro_service"
+        name="Service Catalog"
+        parent="menu_consultpro_config"
+        action="action_consultpro_service"
+        sequence="1"/>
+
+    <menuitem
+        id="menu_consultpro_consultant"
+        name="Consultants"
+        parent="menu_consultpro_config"
+        action="action_consultpro_consultant"
+        sequence="2"/>
+
+</odoo>

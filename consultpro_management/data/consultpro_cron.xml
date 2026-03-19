@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Auto-expire contracts daily -->
+    <record id="cron_auto_expire_contracts" model="ir.cron">
+        <field name="name">ConsultPro: Auto-expire contracts</field>
+        <field name="model_id" ref="model_consultpro_contract"/>
+        <field name="state">code</field>
+        <field name="code">model.cron_auto_expire_contracts()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="active">True</field>
+    </record>
+
+    <!-- Remind consultants to submit timesheets -->
+    <record id="cron_remind_unsubmitted_timesheets" model="ir.cron">
+        <field name="name">ConsultPro: Timesheet submission reminder</field>
+        <field name="model_id" ref="model_consultpro_timesheet"/>
+        <field name="state">code</field>
+        <field name="code">model.cron_remind_unsubmitted()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="active">True</field>
+    </record>
+
+    <!-- Notify about expiring contracts (runs daily) -->
+    <record id="cron_notify_expiring_contracts" model="ir.cron">
+        <field name="name">ConsultPro: Notify expiring contracts</field>
+        <field name="model_id" ref="model_consultpro_notification_service"/>
+        <field name="state">code</field>
+        <field name="code">model.cron_notify_expiring_contracts()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="active">True</field>
+    </record>
+
+</odoo>

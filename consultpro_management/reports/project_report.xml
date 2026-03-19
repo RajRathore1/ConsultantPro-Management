@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ══════════════════════════════════════════
+         PROJECT REPORT — Action + Paper Format
+    ══════════════════════════════════════════ -->
+    <record id="action_report_consultpro_project" model="ir.actions.report">
+        <field name="name">Project Summary Report</field>
+        <field name="model">consultpro.project</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">consultpro_management.report_project_summary</field>
+        <field name="report_file">consultpro_management.report_project_summary</field>
+        <field name="print_report_name">'Project Report - %s' % object.name</field>
+        <field name="binding_model_id" ref="model_consultpro_project"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="report_project_summary">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page">
+
+                        <!-- Header -->
+                        <div class="row mb-4">
+                            <div class="col-8">
+                                <h2 class="text-primary">Project Summary Report</h2>
+                                <h3><t t-esc="doc.name"/></h3>
+                                <span class="badge bg-secondary"><t t-esc="doc.code"/></span>
+                                <span class="ms-2 badge"
+                                      t-attf-class="badge bg-{'success' if doc.state == 'in_progress' else 'warning' if doc.state == 'planning' else 'info'}">
+                                    <t t-esc="doc.state"/>
+                                </span>
+                            </div>
+                            <div class="col-4 text-end">
+                                <p><strong>Date:</strong> <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y')"/></p>
+                                <p><strong>Project Manager:</strong> <t t-esc="doc.project_manager_id.name"/></p>
+                            </div>
+                        </div>
+
+                        <hr/>
+
+                        <!-- Client & Contract Info -->
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <h5>Client Information</h5>
+                                <table class="table table-sm table-borderless">
+                                    <tr><td><strong>Client:</strong></td><td><t t-esc="doc.client_id.name"/></td></tr>
+                                    <tr><td><strong>Contract:</strong></td><td><t t-esc="doc.contract_id.name or 'N/A'"/></td></tr>
+                                    <tr><td><strong>Type:</strong></td><td><t t-esc="doc.project_type"/></td></tr>
+                                </table>
+                            </div>
+                            <div class="col-6">
+                                <h5>Timeline</h5>
+                                <table class="table table-sm table-borderless">
+                                    <tr><td><strong>Start Date:</strong></td><td><t t-esc="doc.date_start"/></td></tr>
+                                    <tr><td><strong>End Date:</strong></td><td><t t-esc="doc.date_end"/></td></tr>
+                                    <tr><td><strong>Days Remaining:</strong></td><td><t t-esc="doc.days_remaining"/></td></tr>
+                                    <t t-if="doc.actual_end_date">
+                                        <tr><td><strong>Actual End:</strong></td><td><t t-esc="doc.actual_end_date"/></td></tr>
+                                    </t>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- KPI Cards -->
+                        <h5>Key Performance Indicators</h5>
+                        <div class="row mb-3">
+                            <div class="col-3 text-center border rounded p-2 me-2">
+                                <div class="h4 text-primary"><t t-esc="'%.0f' % doc.completion_rate"/>%</div>
+                                <div class="small">Completion</div>
+                            </div>
+                            <div class="col-3 text-center border rounded p-2 me-2">
+                                <div class="h4 text-info"><t t-esc="'%.1f' % doc.logged_hours"/>h</div>
+                                <div class="small">Logged Hours</div>
+                            </div>
+                            <div class="col-3 text-center border rounded p-2 me-2">
+                                <div class="h4 text-success"><t t-esc="doc.task_done_count"/>/<t t-esc="doc.task_count"/></div>
+                                <div class="small">Tasks Done</div>
+                            </div>
+                            <div class="col-2 text-center border rounded p-2"
+                                 t-attf-class="col-2 text-center border rounded p-2 {'bg-danger text-white' if doc.is_over_budget else ''}">
+                                <div class="h4"><t t-esc="'%.0f' % (doc.budget_spent / doc.budget * 100 if doc.budget else 0)"/>%</div>
+                                <div class="small">Budget Used</div>
+                            </div>
+                        </div>
+
+                        <!-- Budget -->
+                        <h5>Financial Summary</h5>
+                        <table class="table table-sm table-bordered mb-3">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Budget</th>
+                                    <th>Spent</th>
+                                    <th>Remaining</th>
+                                    <th>Estimated Hours</th>
+                                    <th>Logged Hours</th>
+                                    <th>Remaining Hours</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><t t-esc="doc.budget"/> <t t-esc="doc.currency_id.name"/></td>
+                                    <td><t t-esc="doc.budget_spent"/> <t t-esc="doc.currency_id.name"/></td>
+                                    <td><t t-esc="doc.budget_remaining"/> <t t-esc="doc.currency_id.name"/></td>
+                                    <td><t t-esc="doc.estimated_hours"/>h</td>
+                                    <td><t t-esc="doc.logged_hours"/>h</td>
+                                    <td><t t-esc="doc.remaining_hours"/>h</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- Team -->
+                        <h5>Project Team</h5>
+                        <table class="table table-sm table-bordered mb-3">
+                            <thead class="table-light">
+                                <tr><th>Consultant</th><th>Seniority</th><th>Availability</th><th>Billing Rate</th></tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="doc.consultant_ids" t-as="c">
+                                    <tr>
+                                        <td><t t-esc="c.name"/></td>
+                                        <td><t t-esc="c.seniority"/></td>
+                                        <td><t t-esc="c.availability"/></td>
+                                        <td><t t-esc="c.billing_rate"/> <t t-esc="c.currency_id.name"/>/h</td>
+                                    </tr>
+                                </t>
+                                <t t-if="not doc.consultant_ids">
+                                    <tr><td colspan="4" class="text-muted text-center">No consultants assigned</td></tr>
+                                </t>
+                            </tbody>
+                        </table>
+
+                        <!-- Tasks -->
+                        <h5>Task Status</h5>
+                        <table class="table table-sm table-bordered mb-3">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Task</th><th>Assigned To</th><th>Deadline</th>
+                                    <th>Est. Hrs</th><th>Logged Hrs</th><th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="doc.task_ids" t-as="task">
+                                    <tr t-attf-class="{'table-danger' if task.is_overdue else ''}">
+                                        <td><t t-esc="task.name"/></td>
+                                        <td><t t-esc="task.assigned_to_id.name or '-'"/></td>
+                                        <td><t t-esc="task.date_deadline or '-'"/></td>
+                                        <td><t t-esc="task.estimated_hours"/>h</td>
+                                        <td><t t-esc="task.logged_hours"/>h</td>
+                                        <td><t t-esc="task.state"/></td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+
+                        <!-- Timesheet Summary -->
+                        <h5>Timesheet Summary (Approved)</h5>
+                        <table class="table table-sm table-bordered">
+                            <thead class="table-light">
+                                <tr><th>Consultant</th><th>Hours</th><th>Billable</th><th>Amount</th></tr>
+                            </thead>
+                            <tbody>
+                                <t t-set="approved_ts" t-value="doc.timesheet_ids.filtered(lambda t: t.state == 'approved')"/>
+                                <t t-foreach="doc.consultant_ids" t-as="c">
+                                    <t t-set="c_ts" t-value="approved_ts.filtered(lambda t: t.consultant_id == c)"/>
+                                    <t t-if="c_ts">
+                                        <tr>
+                                            <td><t t-esc="c.name"/></td>
+                                            <td><t t-esc="sum(c_ts.mapped('hours'))"/>h</td>
+                                            <td><t t-esc="sum(c_ts.filtered(lambda t: t.billable).mapped('hours'))"/>h</td>
+                                            <td><t t-esc="sum(c_ts.mapped('amount'))"/> <t t-esc="doc.currency_id.name"/></td>
+                                        </tr>
+                                    </t>
+                                </t>
+                            </tbody>
+                        </table>
+
+                        <!-- Footer note -->
+                        <div class="mt-4 text-muted small">
+                            <p>Generated by ConsultPro Management System on
+                                <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y %H:%M')"/>
+                            </p>
+                        </div>
+
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>

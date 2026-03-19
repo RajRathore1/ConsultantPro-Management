@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="action_report_consultant_utilization" model="ir.actions.report">
+        <field name="name">Consultant Utilization Report</field>
+        <field name="model">consultpro.consultant</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">consultpro_management.report_consultant_utilization</field>
+        <field name="report_file">consultpro_management.report_consultant_utilization</field>
+        <field name="print_report_name">'Utilization Report - %s' % object.name</field>
+        <field name="binding_model_id" ref="model_consultpro_consultant"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="report_consultant_utilization">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page">
+
+                        <!-- Header -->
+                        <div class="row mb-4">
+                            <div class="col-8">
+                                <h2 class="text-primary">Consultant Utilization Report</h2>
+                                <h3><t t-esc="doc.name"/></h3>
+                                <span class="badge bg-secondary"><t t-esc="doc.code"/></span>
+                                <span class="ms-2 badge bg-info"><t t-esc="doc.seniority"/></span>
+                            </div>
+                            <div class="col-4 text-end">
+                                <p><strong>Generated:</strong>
+                                    <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y')"/>
+                                </p>
+                                <p><strong>Availability:</strong>
+                                    <span t-attf-class="badge bg-{'success' if doc.availability == 'available' else 'warning' if doc.availability == 'partially' else 'danger'}">
+                                        <t t-esc="doc.availability"/>
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+
+                        <hr/>
+
+                        <!-- Profile -->
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <h5>Profile</h5>
+                                <table class="table table-sm table-borderless">
+                                    <tr><td><strong>Designation:</strong></td><td><t t-esc="doc.designation or 'N/A'"/></td></tr>
+                                    <tr><td><strong>Experience:</strong></td><td><t t-esc="doc.years_of_experience"/> years</td></tr>
+                                    <tr><td><strong>Max Weekly Hours:</strong></td><td><t t-esc="doc.max_weekly_hours"/>h</td></tr>
+                                    <tr><td><strong>Billing Rate:</strong></td><td><t t-esc="doc.billing_rate"/> <t t-esc="doc.currency_id.name"/>/h</td></tr>
+                                    <tr><td><strong>Cost Rate:</strong></td><td><t t-esc="doc.cost_rate"/> <t t-esc="doc.currency_id.name"/>/h</td></tr>
+                                </table>
+                            </div>
+                            <div class="col-6">
+                                <h5>Utilization Summary</h5>
+                                <table class="table table-sm table-borderless">
+                                    <tr><td><strong>Total Logged Hours:</strong></td><td><t t-esc="'%.1f' % doc.total_logged_hours"/>h</td></tr>
+                                    <tr><td><strong>This Month Hours:</strong></td><td><t t-esc="'%.1f' % doc.current_month_hours"/>h</td></tr>
+                                    <tr><td><strong>Utilization Rate:</strong></td>
+                                        <td>
+                                            <strong t-attf-class="{'text-danger' if doc.utilization_rate > 100 else 'text-success' if doc.utilization_rate >= 70 else 'text-warning'}">
+                                                <t t-esc="'%.1f' % doc.utilization_rate"/>%
+                                            </strong>
+                                        </td>
+                                    </tr>
+                                    <tr><td><strong>Active Projects:</strong></td><td><t t-esc="doc.active_project_count"/></td></tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Utilization Bar (visual) -->
+                        <div class="mb-3">
+                            <h5>Utilization Rate</h5>
+                            <div style="background:#e9ecef; border-radius:4px; height:20px;">
+                                <div t-attf-style="width: #{'%.0f' % min(doc.utilization_rate, 100)}%; background: #{'#28a745' if doc.utilization_rate >= 70 else '#ffc107' if doc.utilization_rate >= 40 else '#dc3545'}; height:20px; border-radius:4px; text-align:center; color:white; font-size:12px; line-height:20px;">
+                                    <t t-esc="'%.1f' % doc.utilization_rate"/>%
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Active Projects -->
+                        <h5>Active Projects</h5>
+                        <table class="table table-sm table-bordered mb-3">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Project</th><th>Client</th><th>Role</th>
+                                    <th>Start</th><th>End</th><th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="doc.project_ids.filtered(lambda p: p.state == 'in_progress')" t-as="proj">
+                                    <tr>
+                                        <td><t t-esc="proj.name"/></td>
+                                        <td><t t-esc="proj.client_id.name"/></td>
+                                        <td><t t-esc="doc.seniority"/></td>
+                                        <td><t t-esc="proj.date_start"/></td>
+                                        <td><t t-esc="proj.date_end"/></td>
+                                        <td><t t-esc="proj.state"/></td>
+                                    </tr>
+                                </t>
+                                <t t-if="not doc.project_ids.filtered(lambda p: p.state == 'in_progress')">
+                                    <tr><td colspan="6" class="text-muted text-center">No active projects</td></tr>
+                                </t>
+                            </tbody>
+                        </table>
+
+                        <!-- Recent Timesheets (last 20) -->
+                        <h5>Recent Timesheet Entries (Last 20)</h5>
+                        <table class="table table-sm table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Date</th><th>Project</th><th>Task</th>
+                                    <th>Description</th><th class="text-center">Hours</th>
+                                    <th>Billable</th><th class="text-end">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-set="recent_ts" t-value="doc.timesheet_ids.filtered(lambda t: t.state == 'approved').sorted(key=lambda t: t.date, reverse=True)[:20]"/>
+                                <t t-foreach="recent_ts" t-as="ts">
+                                    <tr>
+                                        <td><t t-esc="ts.date"/></td>
+                                        <td><t t-esc="ts.project_id.name"/></td>
+                                        <td><t t-esc="ts.task_id.name or '-'"/></td>
+                                        <td><t t-esc="ts.name"/></td>
+                                        <td class="text-center"><t t-esc="ts.hours"/>h</td>
+                                        <td class="text-center">
+                                            <t t-if="ts.billable">✓</t>
+                                            <t t-else="">—</t>
+                                        </td>
+                                        <td class="text-end">
+                                            <t t-if="ts.billable">
+                                                <t t-esc="'%.2f' % ts.amount"/> <t t-esc="doc.currency_id.symbol"/>
+                                            </t>
+                                            <t t-else="">—</t>
+                                        </td>
+                                    </tr>
+                                </t>
+                                <t t-if="not recent_ts">
+                                    <tr><td colspan="7" class="text-muted text-center">No approved timesheets</td></tr>
+                                </t>
+                            </tbody>
+                            <tfoot>
+                                <tr class="table-light">
+                                    <td colspan="4" class="text-end"><strong>Total</strong></td>
+                                    <td class="text-center">
+                                        <strong><t t-esc="'%.1f' % sum(recent_ts.mapped('hours'))"/>h</strong>
+                                    </td>
+                                    <td/>
+                                    <td class="text-end">
+                                        <strong>
+                                            <t t-esc="'%.2f' % sum(recent_ts.mapped('amount'))"/>
+                                            <t t-esc="doc.currency_id.symbol"/>
+                                        </strong>
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+
+                        <!-- Specializations -->
+                        <t t-if="doc.specialization_ids">
+                            <h5 class="mt-3">Specializations</h5>
+                            <p>
+                                <t t-foreach="doc.specialization_ids" t-as="svc">
+                                    <span class="badge bg-primary me-1"><t t-esc="svc.name"/></span>
+                                </t>
+                            </p>
+                        </t>
+
+                        <div class="mt-4 text-muted small">
+                            <p>Confidential — For internal use only.</p>
+                        </div>
+
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>

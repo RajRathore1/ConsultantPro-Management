@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_consultpro_consultant_form" model="ir.ui.view">
+        <field name="name">consultpro.consultant.form</field>
+        <field name="model">consultpro.consultant</field>
+        <field name="arch" type="xml">
+            <form string="Consultant">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_timesheets" type="object"
+                                class="oe_stat_button" icon="fa-clock-o">
+                            <field name="total_logged_hours" widget="statinfo" string="Total Hours"/>
+                        </button>
+                        <button type="object" class="oe_stat_button" icon="fa-briefcase">
+                            <field name="active_project_count" widget="statinfo" string="Active Projects"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" readonly="True"/></h1>
+                        <div><field name="code" readonly="True" class="text-muted"/></div>
+                    </div>
+                    <group>
+                        <group string="Profile">
+                            <field name="employee_id"/>
+                            <field name="designation"/>
+                            <field name="seniority"/>
+                            <field name="years_of_experience"/>
+                            <field name="availability"/>
+                        </group>
+                        <group string="Rates">
+                            <field name="currency_id"/>
+                            <field name="cost_rate" widget="monetary"/>
+                            <field name="billing_rate" widget="monetary"/>
+                            <field name="max_weekly_hours"/>
+                        </group>
+                    </group>
+                    <group string="Utilization (This Month)">
+                        <group>
+                            <field name="current_month_hours"/>
+                            <field name="total_logged_hours"/>
+                            <field name="utilization_rate"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Specializations" name="specializations">
+                            <field name="specialization_ids" widget="many2many_tags"/>
+                        </page>
+                        <page string="Bio" name="bio">
+                            <field name="bio"/>
+                        </page>
+                        <page string="Projects" name="projects">
+                            <field name="project_ids">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="client_id"/>
+                                    <field name="state"/>
+                                    <field name="date_start"/>
+                                    <field name="date_end"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_consultpro_consultant_list" model="ir.ui.view">
+        <field name="name">consultpro.consultant.list</field>
+        <field name="model">consultpro.consultant</field>
+        <field name="arch" type="xml">
+            <list string="Consultants">
+                <field name="code" optional="show"/>
+                <field name="name"/>
+                <field name="seniority"/>
+                <field name="designation" optional="show"/>
+                <field name="billing_rate" optional="show"/>
+                <field name="current_month_hours" optional="show"/>
+                <field name="utilization_rate" optional="show"/>
+                <field name="active_project_count"/>
+                <field name="availability"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_consultpro_consultant" model="ir.actions.act_window">
+        <field name="name">Consultants</field>
+        <field name="res_model">consultpro.consultant</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Add your first consultant!
+            </p>
+        </field>
+    </record>
+
+</odoo>

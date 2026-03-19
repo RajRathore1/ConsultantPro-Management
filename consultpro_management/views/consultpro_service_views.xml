@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- FORM VIEW -->
+    <record id="view_consultpro_service_form" model="ir.ui.view">
+        <field name="name">consultpro.service.form</field>
+        <field name="model">consultpro.service</field>
+        <field name="arch" type="xml">
+            <form string="Service">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="code" class="text-muted"/>
+                        <div>
+                            <field name="code" placeholder="SVC-001"/>
+                        </div>
+                        <h1>
+                            <field name="name" placeholder="Service Name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="category"/>
+                            <field name="billing_type"/>
+                            <field name="standard_rate"/>
+                            <field name="currency_id" options="{'no_create': True}"/>
+                            <field name="active"/>
+                        </group>
+                        <group>
+                            <field name="product_id"/>
+                            <field name="analytic_account_id"/>
+                            <field name="skill_tag_ids" widget="many2many_tags"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Description" name="description">
+                            <field name="description"/>
+                        </page>
+                        <page string="Deliverables" name="deliverables">
+                            <field name="deliverables"
+                                   placeholder="List expected deliverables..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- LIST VIEW -->
+    <record id="view_consultpro_service_list" model="ir.ui.view">
+        <field name="name">consultpro.service.list</field>
+        <field name="model">consultpro.service</field>
+        <field name="arch" type="xml">
+            <list string="Services">
+                <field name="sequence" widget="handle"/>
+                <field name="code"/>
+                <field name="name"/>
+                <field name="category"/>
+                <field name="billing_type"/>
+                <field name="standard_rate"/>
+                <field name="service_line_count" string="Used In"/>
+                <field name="active" optional="show" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ACTION -->
+    <record id="action_consultpro_service" model="ir.actions.act_window">
+        <field name="name">Service Catalog</field>
+        <field name="res_model">consultpro.service</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first Service
+            </p>
+            <p>
+                Define services offered to clients, including billing type,
+                standard rates, and required skills.
+            </p>
+        </field>
+    </record>
+
+</odoo>

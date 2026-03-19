@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ══════════════════════════════════════════
+         TIMESHEET VIEWS
+    ══════════════════════════════════════════ -->
+
+    <!-- FORM VIEW -->
+    <record id="view_consultpro_timesheet_form" model="ir.ui.view">
+        <field name="name">consultpro.timesheet.form</field>
+        <field name="model">consultpro.timesheet</field>
+        <field name="arch" type="xml">
+            <form string="Timesheet Entry">
+                <header>
+                    <button name="action_submit"
+                            string="Submit"
+                            type="object"
+                            class="btn-primary"
+                            invisible="state != 'draft'"/>
+                    <button name="action_approve"
+                            string="Approve"
+                            type="object"
+                            class="btn-success"
+                            invisible="state != 'submitted'"
+                            groups="consultpro_management.group_consultpro_manager"/>
+                    <button name="action_reject"
+                            string="Reject"
+                            type="object"
+                            invisible="state != 'submitted'"
+                            groups="consultpro_management.group_consultpro_manager"/>
+                    <button name="action_reset_draft"
+                            string="Reset to Draft"
+                            type="object"
+                            invisible="state not in ('submitted', 'rejected')"/>
+                    <field name="state"
+                           widget="statusbar"
+                           statusbar_visible="draft,submitted,approved"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Work description..."/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="date"/>
+                            <field name="consultant_id"/>
+                            <field name="project_id"/>
+                            <field name="task_id"
+                                   domain="[('project_id', '=', project_id)]"/>
+                            <field name="activity_type"/>
+                        </group>
+                        <group>
+    <field name="hours"/>
+    <field name="billable"/>
+    <field name="billing_rate" invisible="not billable"/>
+    <field name="amount"
+           widget="monetary"
+           invisible="not billable"/>
+    <field name="currency_id" invisible="True"/>
+</group>
+                    </group>
+                    <group invisible="state != 'approved'">
+                        <field name="approved_by_id" readonly="True"/>
+                        <field name="approved_date" readonly="True"/>
+                    </group>
+                    <group invisible="state != 'rejected'">
+                        <field name="rejection_reason"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- LIST VIEW -->
+    <record id="view_consultpro_timesheet_list" model="ir.ui.view">
+        <field name="name">consultpro.timesheet.list</field>
+        <field name="model">consultpro.timesheet</field>
+        <field name="arch" type="xml">
+            <list string="Timesheets"
+                  decoration-muted="state == 'invoiced'"
+                  decoration-danger="state == 'rejected'">
+                <field name="date"/>
+                <field name="consultant_id"/>
+                <field name="project_id"/>
+                <field name="task_id" optional="show"/>
+                <field name="name"/>
+                <field name="hours"/>
+                <field name="billable" optional="show"/>
+                <field name="amount" widget="monetary" optional="show"/>
+                <field name="state"
+                       widget="badge"
+                       decoration-success="state == 'approved'"
+                       decoration-warning="state == 'submitted'"
+                       decoration-danger="state == 'rejected'"
+                       decoration-info="state == 'invoiced'"/>
+                <field name="currency_id" column_invisible="True"/>
+                <button name="action_approve"
+                        type="object"
+                        string="Approve"
+                        icon="fa-check"
+                        invisible="state != 'submitted'"
+                        groups="consultpro_management.group_consultpro_manager"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- SEARCH VIEW -->
+    <record id="view_consultpro_timesheet_search" model="ir.ui.view">
+        <field name="name">consultpro.timesheet.search</field>
+        <field name="model">consultpro.timesheet</field>
+        <field name="arch" type="xml">
+            <search string="Search Timesheets">
+                <field name="name" string="Description"/>
+                <field name="consultant_id"/>
+                <field name="project_id"/>
+                <separator/>
+                <filter name="my_timesheets"
+                        string="My Timesheets"
+                        domain="[('consultant_id.user_id', '=', uid)]"/>
+                <filter name="submitted"
+                        string="Pending Approval"
+                        domain="[('state', '=', 'submitted')]"/>
+                <filter name="billable"
+                        string="Billable"
+                        domain="[('billable', '=', True)]"/>
+                <filter name="this_month"
+                        string="This Month"
+                        domain="[('date', '&gt;=', (context_today().replace(day=1)).strftime('%Y-%m-%d'))]"/>
+                <separator/>
+                <filter name="group_project"
+                        string="Project"
+                        context="{'group_by': 'project_id'}"/>
+                <filter name="group_consultant"
+                        string="Consultant"
+                        context="{'group_by': 'consultant_id'}"/>
+                <filter name="group_date"
+                        string="Date"
+                        context="{'group_by': 'date:week'}"/>
+                <filter name="group_state"
+                        string="Status"
+                        context="{'group_by': 'state'}"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- ACTIONS -->
+    <record id="action_consultpro_timesheet" model="ir.actions.act_window">
+        <field name="name">Timesheets</field>
+        <field name="res_model">consultpro.timesheet</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_consultpro_timesheet_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No timesheet entries found
+            </p>
+            <p>Log your work hours against projects and tasks.</p>
+        </field>
+    </record>
+
+    <record id="action_consultpro_timesheet_my" model="ir.actions.act_window">
+        <field name="name">My Timesheets</field>
+        <field name="res_model">consultpro.timesheet</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_consultpro_timesheet_search"/>
+        <field name="context">{'search_default_my_timesheets': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No timesheets logged yet
+            </p>
+            <p>Start logging your hours to track billable time.</p>
+        </field>
+    </record>
+
+    <!-- BULK APPROVAL WIZARD ACTION -->
+    <record id="action_consultpro_timesheet_approval_wizard" model="ir.actions.act_window">
+        <field name="name">Approve / Reject Timesheets</field>
+        <field name="res_model">consultpro.timesheet.approval.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="model_consultpro_timesheet"/>
+        <field name="binding_view_types">list</field>
+    </record>
+
+    <!-- INVOICE WIZARD ACTION -->
+    <record id="action_consultpro_invoice_wizard" model="ir.actions.act_window">
+        <field name="name">Generate Invoice</field>
+        <field name="res_model">consultpro.invoice.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="model_consultpro_project"/>
+        <field name="binding_view_types">form</field>
+    </record>
+
+</odoo>

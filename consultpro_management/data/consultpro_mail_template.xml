@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Contract Sent to Client -->
+    <record id="mail_template_contract_sent" model="mail.template">
+        <field name="name">ConsultPro: Contract Sent</field>
+        <field name="model_id" ref="model_consultpro_contract"/>
+        <field name="subject">Contract {{ object.name }} — {{ object.title }}</field>
+        <field name="email_to">{{ object.client_id.email }}</field>
+        <field name="email_from">{{ user.email }}</field>
+        <field name="body_html"><![CDATA[
+            <p>Dear {{ object.client_id.name }},</p>
+            <p>Please find attached the contract <strong>{{ object.name }}</strong> — {{ object.title }}.</p>
+            <p><strong>Contract Value:</strong> {{ format_amount(object.contract_value, object.currency_id) }}</p>
+            <p><strong>Period:</strong> {{ object.date_start }} to {{ object.date_end }}</p>
+            <p>Kindly review and revert with your confirmation.</p>
+            <p>Regards,<br/>{{ user.name }}</p>
+        ]]></field>
+        <field name="auto_delete">True</field>
+    </record>
+
+    <!-- Contract Expiring Soon -->
+    <record id="mail_template_contract_expiring" model="mail.template">
+        <field name="name">ConsultPro: Contract Expiring Soon</field>
+        <field name="model_id" ref="model_consultpro_contract"/>
+        <field name="subject">⚠ Contract {{ object.name }} expiring on {{ object.date_end }}</field>
+        <field name="email_to">{{ object.responsible_id.email }}</field>
+        <field name="body_html"><![CDATA[
+            <p>Hi {{ object.responsible_id.name }},</p>
+            <p>Contract <strong>{{ object.name }}</strong> with client <strong>{{ object.client_id.name }}</strong>
+            is expiring on <strong>{{ object.date_end }}</strong> ({{ object.days_remaining }} days remaining).</p>
+            <p>Please initiate renewal discussions.</p>
+        ]]></field>
+        <field name="auto_delete">True</field>
+    </record>
+
+    <!-- Project Closed -->
+    <record id="mail_template_project_closed" model="mail.template">
+        <field name="name">ConsultPro: Project Closed</field>
+        <field name="model_id" ref="model_consultpro_project"/>
+        <field name="subject">Project {{ object.name }} — Successfully Completed</field>
+        <field name="email_to">{{ object.client_id.email }}</field>
+        <field name="email_from">{{ object.project_manager_id.email }}</field>
+        <field name="body_html"><![CDATA[
+            <p>Dear {{ object.client_id.name }},</p>
+            <p>We are pleased to inform you that project <strong>{{ object.name }}</strong> has been
+            successfully completed on {{ object.actual_end_date }}.</p>
+            <p><strong>Total Logged Hours:</strong> {{ object.logged_hours }}</p>
+            <p><strong>Task Completion:</strong> {{ object.completion_rate | round(1) }}%</p>
+            <p>Thank you for partnering with us. We look forward to future engagements.</p>
+            <p>Regards,<br/>{{ object.project_manager_id.name }}</p>
+        ]]></field>
+        <field name="auto_delete">True</field>
+    </record>
+
+    <!-- Invoice Generated -->
+    <record id="mail_template_invoice_generated" model="mail.template">
+        <field name="name">ConsultPro: Invoice Generated</field>
+        <field name="model_id" ref="model_account_move"/>
+        <field name="subject">Invoice {{ object.name }} — {{ object.partner_id.name }}</field>
+        <field name="email_to">{{ object.partner_id.email }}</field>
+        <field name="body_html"><![CDATA[
+            <p>Dear {{ object.partner_id.name }},</p>
+            <p>Please find your invoice <strong>{{ object.name }}</strong> for
+            project <strong>{{ object.consultpro_project_id.name }}</strong>.</p>
+            <p><strong>Amount Due:</strong> {{ format_amount(object.amount_total, object.currency_id) }}</p>
+            <p><strong>Due Date:</strong> {{ object.invoice_date_due }}</p>
+        ]]></field>
+        <field name="auto_delete">True</field>
+    </record>
+
+    <!-- Timesheet Approved -->
+    <record id="mail_template_timesheet_approved" model="mail.template">
+        <field name="name">ConsultPro: Timesheet Approved</field>
+        <field name="model_id" ref="model_consultpro_timesheet"/>
+        <field name="subject">Your timesheet for {{ object.date }} has been approved</field>
+        <field name="email_to">{{ object.consultant_id.employee_id.work_email }}</field>
+        <field name="body_html"><![CDATA[
+            <p>Hi {{ object.consultant_id.name }},</p>
+            <p>Your timesheet entry of <strong>{{ object.hours }}h</strong> on
+            <strong>{{ object.date }}</strong> for project <strong>{{ object.project_id.name }}</strong>
+            has been approved by {{ object.approved_by_id.name }}.</p>
+        ]]></field>
+        <field name="auto_delete">True</field>
+    </record>
+
+    <!-- Timesheet Rejected -->
+    <record id="mail_template_timesheet_rejected" model="mail.template">
+        <field name="name">ConsultPro: Timesheet Rejected</field>
+        <field name="model_id" ref="model_consultpro_timesheet"/>
+        <field name="subject">Action Required: Timesheet for {{ object.date }} was rejected</field>
+        <field name="email_to">{{ object.consultant_id.employee_id.work_email }}</field>
+        <field name="body_html"><![CDATA[
+            <p>Hi {{ object.consultant_id.name }},</p>
+            <p>Your timesheet entry of <strong>{{ object.hours }}h</strong> on
+            <strong>{{ object.date }}</strong> for project <strong>{{ object.project_id.name }}</strong>
+            has been <strong>rejected</strong>.</p>
+            <p><strong>Reason:</strong> {{ object.rejection_reason }}</p>
+            <p>Please correct and resubmit.</p>
+        ]]></field>
+        <field name="auto_delete">True</field>
+    </record>
+
+    <!-- Timesheet Reminder -->
+    <record id="mail_template_timesheet_reminder" model="mail.template">
+        <field name="name">ConsultPro: Timesheet Submission Reminder</field>
+        <field name="model_id" ref="model_consultpro_timesheet"/>
+        <field name="subject">Reminder: Please submit your timesheet</field>
+        <field name="email_to">{{ object.consultant_id.employee_id.work_email }}</field>
+        <field name="body_html"><![CDATA[
+            <p>Hi {{ object.consultant_id.name }},</p>
+            <p>This is a reminder to submit your timesheet entry for
+            <strong>{{ object.date }}</strong> on project <strong>{{ object.project_id.name }}</strong>.</p>
+            <p>Please log in and submit it for approval.</p>
+        ]]></field>
+        <field name="auto_delete">True</field>
+    </record>
+
+</odoo>

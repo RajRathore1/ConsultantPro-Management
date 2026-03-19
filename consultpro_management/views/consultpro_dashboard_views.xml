@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Dashboard action — ir.actions.act_window to project list as placeholder -->
+    <record id="action_consultpro_dashboard" model="ir.actions.act_window">
+        <field name="name">Dashboard</field>
+        <field name="res_model">consultpro.project</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="context">{'search_default_active_projects': 1}</field>
+    </record>
+
+</odoo>

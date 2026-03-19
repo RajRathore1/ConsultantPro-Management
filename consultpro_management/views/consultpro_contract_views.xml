@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_consultpro_contract_form" model="ir.ui.view">
+        <field name="name">consultpro.contract.form</field>
+        <field name="model">consultpro.contract</field>
+        <field name="arch" type="xml">
+            <form string="Contract">
+                <header>
+                    <button name="action_send_to_client" string="Send to Client" type="object"
+                            class="btn-primary" invisible="state != 'draft'"
+                            groups="consultpro_management.group_consultpro_account_manager"/>
+                    <button name="action_approve" string="Approve" type="object"
+                            class="btn-primary" invisible="state != 'sent'"
+                            groups="consultpro_management.group_consultpro_admin"/>
+                    <button name="action_activate" string="Activate" type="object"
+                            class="btn-success" invisible="state != 'approved'"
+                            groups="consultpro_management.group_consultpro_admin"/>
+                    <button name="action_renew" string="Renew" type="object"
+                            invisible="state not in ('active', 'expired')"
+                            groups="consultpro_management.group_consultpro_account_manager"/>
+                    <button name="action_cancel" string="Cancel" type="object"
+                            invisible="state in ('cancelled', 'expired')"
+                            groups="consultpro_management.group_consultpro_admin"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,sent,approved,active,expired"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_projects" type="object"
+                                class="oe_stat_button" icon="fa-briefcase">
+                            <field name="project_count" widget="statinfo" string="Projects"/>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Overdue" bg_color="text-bg-danger"
+                            invisible="not is_overdue"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" readonly="True"/></h1>
+                        <h2><field name="title" placeholder="Contract Title..."/></h2>
+                    </div>
+                    <group>
+                        <group string="Contract Details">
+                            <field name="client_id"/>
+                            <field name="contract_type"/>
+                            <field name="billing_cycle"/>
+                            <field name="payment_terms_id"/>
+                            <field name="responsible_id"/>
+                        </group>
+                        <group string="Financials">
+                            <field name="currency_id"/>
+                            <field name="contract_value" widget="monetary"/>
+                            <field name="invoiced_amount" widget="monetary"/>
+                            <field name="remaining_value" widget="monetary"/>
+                            <field name="progress"/>
+                        </group>
+                    </group>
+                    <group string="Timeline">
+                        <group>
+                            <field name="date_start"/>
+                            <field name="date_end"/>
+                            <field name="days_remaining"/>
+                        </group>
+                        <group>
+                            <field name="signed_date"/>
+                            <field name="document_url" widget="url"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Service Lines" name="service_lines">
+                            <field name="service_line_ids">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="service_id"/>
+                                    <field name="description"/>
+                                    <field name="billing_type"/>
+                                    <field name="quantity"/>
+                                    <field name="unit_price"/>
+                                    <field name="discount"/>
+                                    <field name="subtotal" widget="monetary"/>
+                                    <field name="currency_id" column_invisible="True"/>
+                                    <field name="is_invoiced" optional="show"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Consultants" name="consultants">
+                            <field name="consultant_ids" widget="many2many_tags"/>
+                        </page>
+                        <page string="Terms and Conditions" name="terms">
+                            <field name="terms_conditions"/>
+                        </page>
+                        <page string="Internal Notes" name="notes">
+                            <field name="internal_notes"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_consultpro_contract_list" model="ir.ui.view">
+        <field name="name">consultpro.contract.list</field>
+        <field name="model">consultpro.contract</field>
+        <field name="arch" type="xml">
+            <list string="Contracts"
+                  decoration-danger="is_overdue"
+                  decoration-muted="state in ('cancelled', 'expired')">
+                <field name="name"/>
+                <field name="title"/>
+                <field name="client_id"/>
+                <field name="contract_type"/>
+                <field name="contract_value" widget="monetary" optional="show"/>
+                <field name="date_start"/>
+                <field name="date_end"/>
+                <field name="days_remaining"/>
+                <field name="responsible_id" optional="show"/>
+                <field name="state"/>
+                <field name="currency_id" column_invisible="True"/>
+                <field name="is_overdue" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_consultpro_contract_search" model="ir.ui.view">
+        <field name="name">consultpro.contract.search</field>
+        <field name="model">consultpro.contract</field>
+        <field name="arch" type="xml">
+            <search string="Search Contracts">
+                <field name="name"/>
+                <field name="title"/>
+                <field name="client_id"/>
+                <field name="responsible_id"/>
+                <separator/>
+                <filter name="active_contracts" string="Active"
+                        domain="[('state', '=', 'active')]"/>
+                <filter name="overdue" string="Overdue"
+                        domain="[('is_overdue', '=', True)]"/>
+                <separator/>
+                <filter name="group_client" string="Client"
+                        context="{'group_by': 'client_id'}"/>
+                <filter name="group_type" string="Contract Type"
+                        context="{'group_by': 'contract_type'}"/>
+                <filter name="group_state" string="Status"
+                        context="{'group_by': 'state'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_consultpro_contract" model="ir.actions.act_window">
+        <field name="name">Contracts</field>
+        <field name="res_model">consultpro.contract</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_consultpro_contract_search"/>
+        <field name="context">{'search_default_active_contracts': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first contract!
+            </p>
+        </field>
+    </record>
+
+</odoo>

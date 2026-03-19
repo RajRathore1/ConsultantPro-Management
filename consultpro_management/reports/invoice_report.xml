@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="action_report_consultpro_invoice" model="ir.actions.report">
+        <field name="name">ConsultPro Invoice Report</field>
+        <field name="model">consultpro.invoice</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">consultpro_management.report_consultpro_invoice</field>
+        <field name="report_file">consultpro_management.report_consultpro_invoice</field>
+        <field name="print_report_name">'Invoice - %s' % object.name</field>
+        <field name="binding_model_id" ref="model_consultpro_invoice"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="report_consultpro_invoice">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page">
+
+                        <!-- Invoice Header -->
+                        <div class="row mb-4">
+                            <div class="col-7">
+                                <h2 class="text-primary">INVOICE</h2>
+                                <h3><t t-esc="doc.name"/></h3>
+                                <t t-if="doc.period_from and doc.period_to">
+                                    <p class="text-muted">
+                                        Billing Period:
+                                        <strong><t t-esc="doc.period_from"/></strong> —
+                                        <strong><t t-esc="doc.period_to"/></strong>
+                                    </p>
+                                </t>
+                            </div>
+                            <div class="col-5 text-end">
+                                <p><strong>Invoice Date:</strong> <t t-esc="doc.invoice_date"/></p>
+                                <p><strong>Status:</strong>
+                                    <span t-attf-class="badge bg-{'success' if doc.payment_state == 'paid' else 'warning'}">
+                                        <t t-esc="doc.payment_state"/>
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+
+                        <hr/>
+
+                        <!-- Bill To / Project Info -->
+                        <div class="row mb-4">
+                            <div class="col-6">
+                                <h5>Bill To</h5>
+                                <p>
+                                    <strong><t t-esc="doc.client_id.name"/></strong><br/>
+                                    <t t-esc="doc.client_id.partner_id.street or ''"/><br/>
+                                    <t t-esc="doc.client_id.partner_id.city or ''"/>
+                                    <t t-if="doc.client_id.partner_id.zip">
+                                        — <t t-esc="doc.client_id.partner_id.zip"/>
+                                    </t><br/>
+                                    <t t-esc="doc.client_id.country_id.name or ''"/>
+                                </p>
+                            </div>
+                            <div class="col-6">
+                                <h5>Project Details</h5>
+                                <table class="table table-sm table-borderless">
+                                    <tr><td><strong>Project:</strong></td><td><t t-esc="doc.project_id.name"/></td></tr>
+                                    <tr t-if="doc.contract_id">
+                                        <td><strong>Contract:</strong></td><td><t t-esc="doc.contract_id.name"/></td>
+                                    </tr>
+                                    <tr><td><strong>Project Manager:</strong></td>
+                                        <td><t t-esc="doc.project_id.project_manager_id.name"/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Invoice Lines (from account.move) -->
+                        <h5>Services Rendered</h5>
+                        <table class="table table-bordered mb-3">
+                            <thead class="table-primary">
+                                <tr>
+                                    <th class="col-6">Description</th>
+                                    <th class="text-center">Qty / Hours</th>
+                                    <th class="text-end">Unit Price</th>
+                                    <th class="text-end">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="doc.move_id.invoice_line_ids" t-as="line">
+                                    <tr>
+                                        <td><t t-esc="line.name"/></td>
+                                        <td class="text-center"><t t-esc="'%.2f' % line.quantity"/></td>
+                                        <td class="text-end">
+                                            <t t-esc="'%.2f' % line.price_unit"/>
+                                            <t t-esc="doc.currency_id.symbol"/>
+                                        </td>
+                                        <td class="text-end">
+                                            <t t-esc="'%.2f' % line.price_subtotal"/>
+                                            <t t-esc="doc.currency_id.symbol"/>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="3" class="text-end"><strong>Subtotal</strong></td>
+                                    <td class="text-end">
+                                        <t t-esc="'%.2f' % doc.move_id.amount_untaxed"/>
+                                        <t t-esc="doc.currency_id.symbol"/>
+                                    </td>
+                                </tr>
+                                <t t-if="doc.move_id.amount_tax">
+                                    <tr>
+                                        <td colspan="3" class="text-end">Tax</td>
+                                        <td class="text-end">
+                                            <t t-esc="'%.2f' % doc.move_id.amount_tax"/>
+                                            <t t-esc="doc.currency_id.symbol"/>
+                                        </td>
+                                    </tr>
+                                </t>
+                                <tr class="table-primary">
+                                    <td colspan="3" class="text-end"><strong>TOTAL DUE</strong></td>
+                                    <td class="text-end">
+                                        <strong>
+                                            <t t-esc="'%.2f' % doc.amount_total"/>
+                                            <t t-esc="doc.currency_id.symbol"/>
+                                        </strong>
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+
+                        <!-- Timesheet Detail (optional breakdown) -->
+                        <t t-if="doc.timesheet_ids">
+                            <h5>Timesheet Breakdown</h5>
+                            <table class="table table-sm table-bordered">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Date</th><th>Consultant</th><th>Description</th>
+                                        <th>Activity</th><th class="text-center">Hours</th>
+                                        <th class="text-end">Rate</th><th class="text-end">Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="doc.timesheet_ids" t-as="ts">
+                                        <tr>
+                                            <td><t t-esc="ts.date"/></td>
+                                            <td><t t-esc="ts.consultant_id.name"/></td>
+                                            <td><t t-esc="ts.name"/></td>
+                                            <td><t t-esc="ts.activity_type"/></td>
+                                            <td class="text-center"><t t-esc="ts.hours"/>h</td>
+                                            <td class="text-end"><t t-esc="ts.billing_rate"/></td>
+                                            <td class="text-end"><t t-esc="'%.2f' % ts.amount"/> <t t-esc="doc.currency_id.symbol"/></td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </t>
+
+                        <!-- Payment Info -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <p class="text-muted small">
+                                    Thank you for your business. Please process payment by the due date.
+                                    For queries, contact your account manager.
+                                </p>
+                            </div>
+                        </div>
+
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>

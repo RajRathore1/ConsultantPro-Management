@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Dashboard model uses _auto = False (no DB table).
+         No seed data required. All KPIs are computed dynamically
+         via consultpro.dashboard model methods called from the
+         JSON-RPC dashboard controller. -->
+</odoo>

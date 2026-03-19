@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ══════════════════════════════════════════
+         DEMO DATA — loads only when demo=True
+    ══════════════════════════════════════════ -->
+
+    <!-- Partners -->
+    <record id="demo_partner_acme" model="res.partner">
+        <field name="name">Acme Technologies Ltd</field>
+        <field name="is_company">True</field>
+        <field name="email">contact@acmetech.com</field>
+        <field name="phone">+91-22-12345678</field>
+    </record>
+
+    <record id="demo_partner_globalfin" model="res.partner">
+        <field name="name">GlobalFin Advisory</field>
+        <field name="is_company">True</field>
+        <field name="email">info@globalfin.com</field>
+    </record>
+
+    <!-- Clients -->
+    <record id="demo_client_acme" model="consultpro.client">
+        <field name="name">Acme Technologies</field>
+        <field name="partner_id" ref="demo_partner_acme"/>
+        <field name="client_type">active</field>
+        <field name="state">active</field>
+        <field name="rating">4</field>
+        <field name="date_onboarded" eval="(datetime.date.today() - relativedelta(months=6)).strftime('%Y-%m-%d')"/>
+    </record>
+
+    <record id="demo_client_globalfin" model="consultpro.client">
+        <field name="name">GlobalFin Advisory</field>
+        <field name="partner_id" ref="demo_partner_globalfin"/>
+        <field name="client_type">vip</field>
+        <field name="state">active</field>
+        <field name="rating">5</field>
+        <field name="date_onboarded" eval="(datetime.date.today() - relativedelta(months=12)).strftime('%Y-%m-%d')"/>
+    </record>
+
+    <!-- Services -->
+    <record id="demo_service_strategy" model="consultpro.service">
+        <field name="name">Digital Transformation Strategy</field>
+        <field name="code">SVC-001</field>
+        <field name="category">strategy</field>
+        <field name="billing_type">daily</field>
+        <field name="standard_rate">1500.00</field>
+    </record>
+
+    <record id="demo_service_tech" model="consultpro.service">
+        <field name="name">ERP Implementation</field>
+        <field name="code">SVC-002</field>
+        <field name="category">technology</field>
+        <field name="billing_type">hourly</field>
+        <field name="standard_rate">180.00</field>
+    </record>
+
+    <record id="demo_service_finance" model="consultpro.service">
+        <field name="name">Financial Due Diligence</field>
+        <field name="code">SVC-003</field>
+        <field name="category">finance</field>
+        <field name="billing_type">fixed</field>
+        <field name="standard_rate">25000.00</field>
+    </record>
+
+    <!-- Contracts -->
+    <record id="demo_contract_acme" model="consultpro.contract">
+        <field name="title">Acme ERP Implementation 2025</field>
+        <field name="client_id" ref="demo_client_acme"/>
+        <field name="contract_type">time_material</field>
+        <field name="state">active</field>
+        <field name="date_start" eval="(datetime.date.today() - relativedelta(months=3)).strftime('%Y-%m-%d')"/>
+        <field name="date_end" eval="(datetime.date.today() + relativedelta(months=9)).strftime('%Y-%m-%d')"/>
+        <field name="contract_value">250000.00</field>
+        <field name="billing_cycle">monthly</field>
+    </record>
+
+    <record id="demo_contract_globalfin" model="consultpro.contract">
+        <field name="title">GlobalFin DD &amp; Strategy Retainer</field>
+        <field name="client_id" ref="demo_client_globalfin"/>
+        <field name="contract_type">retainer</field>
+        <field name="state">active</field>
+        <field name="date_start" eval="datetime.date.today().replace(day=1).strftime('%Y-%m-%d')"/>
+        <field name="date_end" eval="(datetime.date.today().replace(day=1) + relativedelta(months=12)).strftime('%Y-%m-%d')"/>
+        <field name="contract_value">120000.00</field>
+        <field name="billing_cycle">monthly</field>
+    </record>
+
+    <!-- Projects -->
+    <record id="demo_project_acme_erp" model="consultpro.project">
+        <field name="name">Acme ERP Phase 1 — Core Modules</field>
+        <field name="client_id" ref="demo_client_acme"/>
+        <field name="contract_id" ref="demo_contract_acme"/>
+        <field name="project_type">implementation</field>
+        <field name="state">in_progress</field>
+        <field name="date_start" eval="(datetime.date.today() - relativedelta(months=2)).strftime('%Y-%m-%d')"/>
+        <field name="date_end" eval="(datetime.date.today() + relativedelta(months=4)).strftime('%Y-%m-%d')"/>
+        <field name="estimated_hours">800.0</field>
+        <field name="budget">150000.00</field>
+    </record>
+
+    <record id="demo_project_globalfin_dd" model="consultpro.project">
+        <field name="name">GlobalFin — Q1 Due Diligence</field>
+        <field name="client_id" ref="demo_client_globalfin"/>
+        <field name="contract_id" ref="demo_contract_globalfin"/>
+        <field name="project_type">audit</field>
+        <field name="state">in_progress</field>
+        <field name="date_start" eval="datetime.date.today().replace(day=1).strftime('%Y-%m-%d')"/>
+        <field name="date_end" eval="(datetime.date.today() + relativedelta(months=2)).strftime('%Y-%m-%d')"/>
+        <field name="estimated_hours">200.0</field>
+        <field name="budget">30000.00</field>
+    </record>
+
+    <!-- Tasks -->
+    <record id="demo_task_acme_1" model="consultpro.task">
+        <field name="name">Requirements Gathering &amp; Gap Analysis</field>
+        <field name="project_id" ref="demo_project_acme_erp"/>
+        <field name="task_type">deliverable</field>
+        <field name="state">done</field>
+        <field name="estimated_hours">40.0</field>
+        <field name="date_start" eval="(datetime.date.today() - relativedelta(months=2)).strftime('%Y-%m-%d')"/>
+        <field name="date_deadline" eval="(datetime.date.today() - relativedelta(months=1)).strftime('%Y-%m-%d')"/>
+    </record>
+
+    <record id="demo_task_acme_2" model="consultpro.task">
+        <field name="name">System Design &amp; Architecture</field>
+        <field name="project_id" ref="demo_project_acme_erp"/>
+        <field name="task_type">deliverable</field>
+        <field name="state">in_progress</field>
+        <field name="estimated_hours">80.0</field>
+        <field name="date_start" eval="(datetime.date.today() - relativedelta(months=1)).strftime('%Y-%m-%d')"/>
+        <field name="date_deadline" eval="(datetime.date.today() + relativedelta(months=1)).strftime('%Y-%m-%d')"/>
+    </record>
+
+    <record id="demo_task_acme_3" model="consultpro.task">
+        <field name="name">User Acceptance Testing</field>
+        <field name="project_id" ref="demo_project_acme_erp"/>
+        <field name="task_type">review</field>
+        <field name="state">todo</field>
+        <field name="estimated_hours">60.0</field>
+        <field name="date_start" eval="(datetime.date.today() + relativedelta(months=2)).strftime('%Y-%m-%d')"/>
+        <field name="date_deadline" eval="(datetime.date.today() + relativedelta(months=3)).strftime('%Y-%m-%d')"/>
+    </record>
+
+    <record id="demo_task_fin_1" model="consultpro.task">
+        <field name="name">Financial Statement Analysis</field>
+        <field name="project_id" ref="demo_project_globalfin_dd"/>
+        <field name="task_type">analysis</field>
+        <field name="state">in_progress</field>
+        <field name="estimated_hours">50.0</field>
+        <field name="date_deadline" eval="(datetime.date.today() + relativedelta(weeks=3)).strftime('%Y-%m-%d')"/>
+    </record>
+
+</odoo>

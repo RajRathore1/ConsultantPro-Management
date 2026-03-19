@@ -22,7 +22,7 @@
         * Email Notifications & Cron Jobs
     """,
     'author': 'Digimonk Technologies',
-    'website': 'https://www.consultpro.com',
+    'website': 'https://digimonk.in/',
     'license': 'LGPL-3',
     'depends': [
         'base',

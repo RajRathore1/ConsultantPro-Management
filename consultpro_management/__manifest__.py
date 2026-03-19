@@ -21,7 +21,7 @@
         * Client Portal Access
         * Email Notifications & Cron Jobs
     """,
-    'author': 'ConsultPro Team',
+    'author': 'Digimonk Technologies',
     'website': 'https://www.consultpro.com',
     'license': 'LGPL-3',
     'depends': [

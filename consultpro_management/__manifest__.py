@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 {
-    'name': 'ConsultPro Management',
+    'name': 'ConsultingPro Management',
     'version': '19.0.1.0.0',
     'category': 'Consulting',
     'summary': 'End-to-end Consulting Firm Management: Clients, Contracts, Projects, Timesheets, Invoicing',
